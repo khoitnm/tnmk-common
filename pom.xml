@@ -13,6 +13,7 @@
     <java.version>17</java.version>
     <spring-boot.version>3.1.1</spring-boot.version>
     <commons-io.version>2.11.0</commons-io.version>
+    <poi.version>5.2.3</poi.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
     <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
@@ -28,6 +29,13 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
+
+    <!-- For equals() and hashCode(), isNotBlank(), etc. -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -48,6 +56,22 @@
       <artifactId>spring-boot-configuration-processor</artifactId>
       <optional>true</optional>
     </dependency>
+
+    <!-- EXCEL ///////////////////////////////////////// -->
+    <dependency>
+      <!-- Excel (.xls)-->
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi</artifactId>
+      <version>${poi.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Excel (.xlsx)-->
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>${poi.version}</version>
+    </dependency>
+
+
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
