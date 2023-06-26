@@ -11,18 +11,23 @@ import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BeanValidator {
-  private static final Validator validator = new ValidatorConfig().validator();
+    private static final Validator validator = new ValidatorConfig().validator();
 
-  public static <T> void validate(T object) throws ConstraintViolationException {
-    Set<ConstraintViolation<T>> violations = validator.validate(object);
-    if (!violations.isEmpty()) {
-      throw new ConstraintViolationException("BeanValidator %s\n%s".formatted(object, violations), violations);
+    public static <T> void validate(T object) throws ConstraintViolationException {
+        Set<ConstraintViolation<T>> violations = validator.validate(object);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(
+                "Invalid bean: "
+                    + "\n\tViolations: " + violations
+                    + "\n\tBean: " + object,
+                violations
+            );
+        }
     }
-  }
 
-  public static <T> void validateEquals(@NotNull T expectedValue, T actualValue, String message) throws IllegalStateException {
-    if (!expectedValue.equals(actualValue)) {
-      throw new IllegalStateException(message);
+    public static <T> void validateEquals(@NotNull T expectedValue, T actualValue, String message) throws IllegalStateException {
+        if (!expectedValue.equals(actualValue)) {
+            throw new IllegalStateException(message);
+        }
     }
-  }
 }
