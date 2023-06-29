@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MapUtils {
-    public static  <T> void addToListInMap(Map<String, List<T>> map, String key, T element) {
+    public static  <K, T> void addToListInMap(Map<K, List<T>> map, K key, T element) {
         List<T> list = map.get(key);
         synchronized (map) {
             if (list == null) {
