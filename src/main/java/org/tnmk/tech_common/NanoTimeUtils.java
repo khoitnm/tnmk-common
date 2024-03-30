@@ -1,9 +1,6 @@
 package org.tnmk.tech_common;
 
-import lombok.Builder;
-import lombok.Getter;
-import org.hibernate.grammars.hql.HqlParser;
-
+import java.math.BigInteger;
 import java.time.Instant;
 
 /**
@@ -20,11 +17,16 @@ public class NanoTimeUtils {
      * However, that's not guarantee to have exactly nanosecond precision.
      * - The values of seconds and nano depend on the accuracy of the local hardware clock.
      * - And even that doesn't guarantee uniqueness globally when the logic is run on may different computers.
+     * <p/>
+     * <b>Note: This method is only correct at maximum 2262-01-01T00:00:00.00Z</b>:<br/>
+     * For an instant after that, this method will get number overflow, and hence the result will be negative.
+     * If you really want to calculate for time after that,
+     * write another method that use {@link BigInteger} instead of {@link Long}.
      */
-    public static long getNanosecondsSinceEpoch(Instant instant) {
+    public static long getEpocNano(Instant instant) {
         long seconds = instant.getEpochSecond();
         int nanoseconds = instant.getNano();
-        long nanosecondsSinceEpoch = seconds * 1_000_000_000L + nanoseconds;
-        return nanosecondsSinceEpoch;
+        long epocNanoseconds = seconds * 1_000_000_000L + nanoseconds;
+        return epocNanoseconds;
     }
 }
