@@ -6,7 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.Set;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -16,24 +20,48 @@ class UniqueUtilsTest {
     @Test
     void checkDuplications() {
         int length = 14;
-        int loopMax = 10000000;
+        int loopMax = 20000000;
 
-        Set<String> generatedList = IntStream.range(0, loopMax)
+        List<UniqueUtils.TimeBaseUnique> generatedList = IntStream.range(0, loopMax)
             .parallel()
-            .mapToObj(i -> {
-//                try {
-//                    Thread.sleep(0, 1);
-//                } catch (InterruptedException e) {
-//                    throw new IllegalStateException(e);
-//                }
-                return UniqueUtils.timeBasedUniqueString(length);
-            })
-            .collect(Collectors.toSet());
+            .mapToObj(i -> UniqueUtils.timeBasedUniqueString(length))
+            .toList();
 
-        log.info(String.join("\n", generatedList.stream().limit(10).toList()));
-        long duplicationsCount = loopMax - generatedList.size();
-        log.info("Duplication: " + duplicationsCount);
+        List<UniqueUtils.TimeBaseUnique> duplications = findDuplications(generatedList);
+
+        long duplicationsCount = duplications.size();
         Assertions.assertThat(duplicationsCount).isLessThan(5);
+        log.info("Duplications size: " + duplications.size());
+        log.info("Duplications:\n " +formatUniqueResults(duplications));
+
+        if (!duplications.isEmpty()) {
+            UniqueUtils.TimeBaseUnique firstDuplication = duplications.get(0);
+            List<UniqueUtils.TimeBaseUnique> itemsAtTheSameMoment = findItemsAtTheSameInstant(generatedList, firstDuplication.getInstant());
+            log.info("itemsAtTheSameMoment:\n " +formatUniqueResults(itemsAtTheSameMoment));
+        }
+    }
+
+    private String formatUniqueResults(List<UniqueUtils.TimeBaseUnique> uniqueResults) {
+        return uniqueResults.stream()
+            .map(UniqueUtils.TimeBaseUnique::toString)
+            .collect(Collectors.joining("\n"));
+    }
+
+    private List<UniqueUtils.TimeBaseUnique> findItemsAtTheSameInstant(List<UniqueUtils.TimeBaseUnique> list, Instant instant) {
+        return list.stream().filter(item -> item.getInstant().equals(instant)).toList();
+    }
+
+    private List<UniqueUtils.TimeBaseUnique> findDuplications(List<UniqueUtils.TimeBaseUnique> list) {
+        List<UniqueUtils.TimeBaseUnique> duplications = new ArrayList<>();
+        Map<String, UniqueUtils.TimeBaseUnique> uniqueStrings = new HashMap<>(list.size());
+        for (UniqueUtils.TimeBaseUnique item : list) {
+            UniqueUtils.TimeBaseUnique existing = uniqueStrings.put(item.getUniqueValue(), item);
+            if (existing != null) {
+                duplications.add(existing);
+                duplications.add(item);
+            }
+        }
+        return duplications;
     }
 
     @ParameterizedTest
@@ -47,7 +75,7 @@ class UniqueUtilsTest {
     )
     void timeBasedUniqueString_checkLengthValidation(int length, boolean expectSuccess) {
         try {
-            String result = UniqueUtils.timeBasedUniqueString(length);
+            String result = UniqueUtils.timeBasedUniqueString(length).getUniqueValue();
             log.info("Result: " + result);
             if (expectSuccess) {
                 Assertions.assertThat(result).hasSize(length);

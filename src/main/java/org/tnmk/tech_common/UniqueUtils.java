@@ -2,6 +2,9 @@ package org.tnmk.tech_common;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.time.Instant;
@@ -22,13 +25,14 @@ public class UniqueUtils {
      * <p/>
      * And then we'll convert timestamp value ({@link Long} number) to base64 so that with the same amount of characters,
      * we can represent many more numbers.
+     *
      * @param expectedLength should be at least 9 (because that's the length of epocNanosecond in base-64 format).
-     *               If the expectedLength less than that, the uniqueness would be significantly reduced.
+     *                       If the expectedLength less than that, the uniqueness would be significantly reduced.
      */
     @Valid
-    public static String timeBasedUniqueString(@Min(9) int expectedLength) {
-
-        long epocNanosecond = NanoTimeUtils.getEpocNano(Instant.now());
+    public static TimeBaseUnique timeBasedUniqueString(@Min(9) int expectedLength) {
+        Instant now = Instant.now();
+        long epocNanosecond = NanoTimeUtils.getEpocNano(now);
         // In theory, epocNanosecond could be 1711559724093779212 when computer can really have nanosecond precision.
         // In reality, computer cannot have that, so epocNanosecond is usually just 1711559724093779200 (last 2 digits are just 00).
         // That's why we remove 2 last digits, and hence epocTimePrecision is 17115597240937792.
@@ -41,6 +45,18 @@ public class UniqueUtils {
         if (randomLength > 0) {
             timeBaseUnique = epocTimeAsBase64 + RandomStringUtils.randomAscii(randomLength);
         }
-        return timeBaseUnique;
+        return TimeBaseUnique.builder().instant(now).uniqueValue(timeBaseUnique).build();
+    }
+
+    @Builder
+    @Getter
+    @EqualsAndHashCode
+    public static class TimeBaseUnique {
+        private final Instant instant;
+        private final String uniqueValue;
+
+        public String toString() {
+            return "Instants: %s, nano: %s, uniqueValue: %s".formatted(instant, NanoTimeUtils.getEpocNano(instant), uniqueValue);
+        }
     }
 }
